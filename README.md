@@ -36,3 +36,7 @@ Further information can be found in the API documentation:
 - [HttpResponse](HttpResponse.md)
 - [HttpRouter](HttpRouter.md)
 - [HttpServer](HttpServer.md)
+
+## Issues and feature requests
+
+Please check out the [deep entertainment issue repository](https://github.com/deep-entertainment/issues/issues) if you find bugs or have ideas for new features.
