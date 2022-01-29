@@ -1,0 +1,41 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[ {
+"base": "Object",
+"class": "HttpRequest",
+"language": "GDScript",
+"path": "res://addons/godottpd/http_request.gd"
+}, {
+"base": "Object",
+"class": "HttpResponse",
+"language": "GDScript",
+"path": "res://addons/godottpd/http_response.gd"
+}, {
+"base": "Object",
+"class": "HttpRouter",
+"language": "GDScript",
+"path": "res://addons/godottpd/http_router.gd"
+}, {
+"base": "Node",
+"class": "HttpServer",
+"language": "GDScript",
+"path": "res://addons/godottpd/http_server.gd"
+} ]
+_global_script_class_icons={
+"HttpRequest": "",
+"HttpResponse": "",
+"HttpRouter": "",
+"HttpServer": ""
+}
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/godottpd/plugin.cfg" )
