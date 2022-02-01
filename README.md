@@ -32,10 +32,10 @@ server.start()
 
 Further information can be found in the API documentation:
 
-- [HttpRequest](HttpRequest.md)
-- [HttpResponse](HttpResponse.md)
-- [HttpRouter](HttpRouter.md)
-- [HttpServer](HttpServer.md)
+- [HttpRequest](docs/api/HttpRequest.md)
+- [HttpResponse](docs/api/HttpResponse.md)
+- [HttpRouter](docs/api/HttpRouter.md)
+- [HttpServer](docs/api/HttpServer.md)
 
 ## Issues and feature requests
 
