@@ -1,5 +1,5 @@
 # A response object useful to send out responses
-extends Object
+extends Reference
 class_name HttpResponse
 
 
