@@ -2,6 +2,9 @@
 extends Node
 class_name HttpServer
 
+# If debug messages should be printed in console on requests
+var _debug: bool = false
+
 
 # The ip address to bind the server to. Use * for all IP addresses [*]
 var bind_address: String = "*"
@@ -32,10 +35,17 @@ var _header_regex: RegEx = RegEx.new()
 var _local_base_path: String = "res://src"
 
 # Compile the required regex
-func _init() -> void:
+# @debug --> set debug messages on/off ('off' by default)
+func _init(debug: bool = false) -> void:
+	self._debug = debug
 	_method_regex.compile("^(?<method>GET|POST|HEAD|PUT|PATCH|DELETE|OPTIONS) (?<path>[^ ]+) HTTP/1.1$")
 	_header_regex.compile("^(?<key>[^:]+): (?<value>.+)$")
 
+func _print_debug(message: String) -> void:
+	if _debug:
+		var time = OS.get_datetime()
+		var time_return = "%02d-%02d-%02d %02d:%02d:%02d" % [time.year, time.month, time.day, time.hour, time.minute, time.second]
+		print("[SERVER] ",time_return," >> ", message)
 
 # Register a new router to handle a specific path
 #
@@ -70,6 +80,7 @@ func _process(_delta: float) -> void:
 func start():
 	self._server = TCP_Server.new()
 	self._server.listen(self.port, self.bind_address)
+	_print_debug("Server listening on http://%s:%s" % [self.bind_address, self.port])
 
 
 # Stop the server and disconnect all clients
@@ -78,6 +89,7 @@ func stop():
 		client.disconnect_from_host()
 	self._clients.clear()
 	self._server.stop()
+	_print_debug("Server stopped.")
 	
 
 # Interpret a request string and perform the request
@@ -114,6 +126,7 @@ func _handle_request(client: StreamPeer, request_string: String):
 #   - headers: A dictionary of headers of the request
 #   - body: The raw body of the request
 func _perform_current_request(client: StreamPeer, request: HttpRequest):
+	_print_debug("HTTP Request: " + str(request))
 	var found = false
 	var response = HttpResponse.new()
 	response.client = client

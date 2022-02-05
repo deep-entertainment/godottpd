@@ -17,3 +17,7 @@ var path: String
 
 # The method
 var method: String
+
+
+func _to_string() -> String:
+    return "[headers=%s, method='%s', path='%s']" % [headers, method, path]
