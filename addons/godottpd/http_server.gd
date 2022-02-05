@@ -5,7 +5,6 @@ class_name HttpServer
 # If debug messages should be printed in console on requests
 var _debug: bool = false
 
-
 # The ip address to bind the server to. Use * for all IP addresses [*]
 var bind_address: String = "*"
 
@@ -35,12 +34,12 @@ var _header_regex: RegEx = RegEx.new()
 var _local_base_path: String = "res://src"
 
 # Compile the required regex
-# @debug --> set debug messages on/off ('off' by default)
-func _init(debug: bool = false) -> void:
-	self._debug = debug
+func _init(_debug: bool = false) -> void:
+	self._debug = _debug
 	_method_regex.compile("^(?<method>GET|POST|HEAD|PUT|PATCH|DELETE|OPTIONS) (?<path>[^ ]+) HTTP/1.1$")
 	_header_regex.compile("^(?<key>[^:]+): (?<value>.+)$")
 
+# Print a debug message in console, if the debug mode is enabled
 func _print_debug(message: String) -> void:
 	if _debug:
 		var time = OS.get_datetime()
@@ -55,9 +54,16 @@ func _print_debug(message: String) -> void:
 # - router: The HttpRouter that will handle the request
 func register_router(path: String, router: HttpRouter):
 	var path_regex = RegEx.new()
-	path_regex.compile(path)
+	var params: Array = []
+	if path.left(0) == "^":
+		path_regex.compile(path)
+	else:
+		var regexp: Array = _path_to_regexp(path)
+		path_regex.compile(regexp[0])
+		params = regexp[1]
 	_routers.push_back({
 		"path": path_regex,
+		"params": params,
 		"router": router
 	})
 
@@ -135,6 +141,9 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 		var matches = router.path.search(request.path)
 		if matches:
 			request.query_match = matches
+			if router.params.size() > 0:
+				for parameter in router.params:
+					request.parameters[parameter] = request.query_match.get_string(parameter)
 			match request.method:
 				"GET":
 					found = true
@@ -161,8 +170,11 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 		if not serve_file(request, response):
 			response.send(404, "Not found")
 
+# Serve a file in the local system.
+# Files to be exposed are only rooted from the @_local_base_path for security
 func serve_file(request: HttpRequest, response: HttpResponse) -> bool:
-	var file_path: String = request.path+".html" if request.path.get_extension() != "html" else request.path
+	var file_path: String = "index.html" if request.path == "/" else \
+	(request.path.get_basename()+".html" if request.path.get_extension() != "html" else request.path)
 	var file = File.new()
 	var file_opened: bool = not bool(file.open(_local_base_path+"/"+file_path, File.READ))
 	if file_opened:
@@ -170,3 +182,27 @@ func serve_file(request: HttpRequest, response: HttpResponse) -> bool:
 		file.close()
 		response.send(200, content)
 	return file_opened
+
+
+# Converts a URL path to @regexp RegExp, providing a mechanism to fetch groups from the expression
+# indexing each parameter by name in the @params array
+#
+# @regexp --> the output expression as a String, to be compiled in RegExp
+# @params --> an Array of parameters, indexed by names. Can be fetched using `RegExp.get_string()` method
+# ex. "/user/:id" --> "^/user/(?<id>([^/#?]+?))[/#?]?$"
+func _path_to_regexp(path: String) -> Array:
+	var regexp: String = "^"
+	var params: Array = []
+	var fragments: Array = path.split("/")
+	fragments.pop_front()
+	for fragment in fragments:
+		if fragment.left(1) == ":":
+			fragment = fragment.lstrip(":")
+			regexp+="/(?<%s>([^/#?]+?))"%fragment
+			params.append(fragment)
+		else:
+			regexp+="/"+fragment
+	regexp+="[/#?]?$"
+	return [regexp, params]
+
+
