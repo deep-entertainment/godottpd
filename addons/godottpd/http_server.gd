@@ -28,6 +28,8 @@ var _method_regex: RegEx = RegEx.new()
 # A regex for header lines
 var _header_regex: RegEx = RegEx.new()
 
+# The base path used in a project to serve files
+var _local_base_path: String = "res://src"
 
 # Compile the required regex
 func _init() -> void:
@@ -143,4 +145,15 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 					found = true
 					router.router.handle_options(request, response)
 	if not found:
-		response.send(404, "Not found")
+		if not serve_file(request, response):
+			response.send(404, "Not found")
+
+func serve_file(request: HttpRequest, response: HttpResponse) -> bool:
+	var file_path: String = request.path+".html" if request.path.get_extension() != "html" else request.path
+	var file = File.new()
+	var file_opened: bool = not bool(file.open(_local_base_path+"/"+file_path, File.READ))
+	if file_opened:
+		var content = file.get_as_text()
+		file.close()
+		response.send(200, content)
+	return file_opened
