@@ -168,7 +168,7 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 					router.router.handle_options(request, response)
 	if not found:
 		if not request.path.get_extension() in ["gd"]:
-			var content: String = serve_file(request)
+			var content: String = serve_file(request.path)
 			if content != "":
 				found = true
 				response.send(200, content, "text/"+request.path.get_extension())
@@ -177,10 +177,10 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 
 # Serve a file in the local system.
 # Files to be exposed are only rooted from the @_local_base_path for security
-func serve_file(request: HttpRequest) -> String:
+func serve_file(request_path: String) -> String:
 	var content: String = ""
 	var file = File.new()
-	var file_opened: bool = not bool(file.open(_local_base_path+"/"+request.path, File.READ))
+	var file_opened: bool = not bool(file.open(_local_base_path+"/"+request_path, File.READ))
 	if file_opened:
 		content = file.get_as_text()
 		file.close()
