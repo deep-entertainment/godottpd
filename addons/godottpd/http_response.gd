@@ -41,5 +41,20 @@ func set(field: String, value: String) -> void:
 #
 # @name --> the name of the cookie i.e. "user-id"
 # @value --> the value of this cookie i.e. "abcdef"
-func cookie(name: String, value: String) -> void:
-	cookies.append(name+"="+value)
+func cookie(name: String, value: String, options: Dictionary = {}) -> void:
+	var cookie: String = name+"="+value
+	if options.has("domain"): cookie+="; Domain="+options["domain"]
+	if options.has("max-age"): cookie+="; Max-Age="+options["max-age"]
+	if options.has("expires"): cookie+="; Expires="+options["expires"]
+	if options.has("path"): cookie+="; Path="+options["path"]
+	if options.has("secure"): cookie+="; Secure="+options["secure"]
+	if options.has("httpOnly"): cookie+="; HttpOnly="+options["httpOnly"]
+	if options.has("path"): cookie+="; Path="+options["path"]
+	if options.has("sameSite"): 
+		match (options["sameSite"]):
+			true: cookie += "; SameSite=Strict"
+			"lax": cookie += "; SameSite=Lax"
+			"strict": cookie += "; SameSite=Strict"
+			"none": cookie += "; SameSite=None"
+			_: pass
+	cookies.append(cookie)
