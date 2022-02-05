@@ -167,21 +167,24 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 					found = true
 					router.router.handle_options(request, response)
 	if not found:
-		if not serve_file(request, response):
-			response.send(404, "Not found")
+		if not request.path.get_extension() in ["gd"]:
+			var content: String = serve_file(request)
+			if content != "":
+				found = true
+				response.send(200, content, "text/"+request.path.get_extension())
+	if not found:	
+		response.send(404, "Not found")
 
 # Serve a file in the local system.
 # Files to be exposed are only rooted from the @_local_base_path for security
-func serve_file(request: HttpRequest, response: HttpResponse) -> bool:
-	var file_path: String = "index.html" if request.path == "/" else \
-	(request.path.get_basename()+".html" if request.path.get_extension() != "html" else request.path)
+func serve_file(request: HttpRequest) -> String:
+	var content: String = ""
 	var file = File.new()
-	var file_opened: bool = not bool(file.open(_local_base_path+"/"+file_path, File.READ))
+	var file_opened: bool = not bool(file.open(_local_base_path+"/"+request.path, File.READ))
 	if file_opened:
-		var content = file.get_as_text()
+		content = file.get_as_text()
 		file.close()
-		response.send(200, content)
-	return file_opened
+	return content
 
 
 # Converts a URL path to @regexp RegExp, providing a mechanism to fetch groups from the expression
@@ -204,5 +207,3 @@ func _path_to_regexp(path: String) -> Array:
 			regexp+="/"+fragment
 	regexp+="[/#?]?$"
 	return [regexp, params]
-
-
