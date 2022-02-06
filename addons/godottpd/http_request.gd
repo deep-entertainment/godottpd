@@ -1,5 +1,5 @@
 # An HTTP request received by the server
-extends Object
+extends Reference
 class_name HttpRequest
 
 
