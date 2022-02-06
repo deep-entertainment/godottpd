@@ -9,17 +9,92 @@ var client: StreamPeer
 # The server identifier to use on responses [GodotTPD]
 var server_identifier: String = "GodotTPD"
 
+# A dictionary of headers
+# Headers can be set using the `set(name, value)` function
 var headers: Dictionary = {}
+
+# An array of cookies
+# Cookies can be set using the `cookie(name, value, options)` function
+# Cookies will be automatically sent via "Set-Cookie" headers to clients
 var cookies: Array = []
 
+# Send out a response to the client
+#
+# #### Parameters
+# - status: The HTTP status code to send
+# - data: The body data to send
+# - content_type: The type of the content to send
+func send(status_code: int, data: String = "", content_type: String = "text/html") -> void:
+	client.put_data(("HTTP/1.1 %d %s\n" % [status_code, _match_status_code(status_code)]).to_ascii())
+	client.put_data(("Server: %s\n" % server_identifier).to_ascii())
+	for header in headers.keys():
+		client.put_data(("%s: %s\n" % [header, headers[header]]).to_ascii())
+	for cookie in cookies:
+		client.put_data(("Set-Cookie: %s\n" % cookie).to_ascii())
+	client.put_data(("Content-Length: %d\n" % data.to_ascii().size()).to_ascii())
+	client.put_data("Connection: close\n".to_ascii())
+	client.put_data(("Content-Type: %s\n\n" % content_type).to_ascii())
+	client.put_data(data.to_ascii())
+
+
+# Send out a JSON response to the client
+# This function will internally call the `send()` method 
+#
+# #### Parameters
+# @status_code --> The HTTP status code to send
+# @data --> The body data to send, must be a Dictionary or an Array
+func json(status_code: int, data) -> void:
+	send(status_code, JSON.print(data), "application/json")
+
+
+# Sets the response’s header "field" to "value"
+#
+# #### Parameters
+# @field --> the name of the header i.e. "Accept-Type"
+# @value --> the value of this header i.e. "application/json"
+func set(field: String, value: String) -> void:
+	headers[field] = value
+
+
+# Sets cookie "name" to "value"
+#
+# @name --> the name of the cookie i.e. "user-id"
+# @value --> the value of this cookie i.e. "abcdef"
+func cookie(name: String, value: String, options: Dictionary = {}) -> void:
+	var cookie: String = name+"="+value
+	if options.has("domain"): cookie+="; Domain="+options["domain"]
+	if options.has("max-age"): cookie+="; Max-Age="+options["max-age"]
+	if options.has("expires"): cookie+="; Expires="+options["expires"]
+	if options.has("path"): cookie+="; Path="+options["path"]
+	if options.has("secure"): cookie+="; Secure="+options["secure"]
+	if options.has("httpOnly"): cookie+="; HttpOnly="+options["httpOnly"]
+	if options.has("path"): cookie+="; Path="+options["path"]
+	if options.has("sameSite"): 
+		match (options["sameSite"]):
+			true: cookie += "; SameSite=Strict"
+			"lax": cookie += "; SameSite=Lax"
+			"strict": cookie += "; SameSite=Strict"
+			"none": cookie += "; SameSite=None"
+			_: pass
+	cookies.append(cookie)
+
+
+# Automatically matches a "status_code" to an RFC 7231 compliant "status_text"
+#
+# #### Parameters
+# @code --> HTTP Status Code to be matched
+# 
+# #### Returns
+# @String --> the matched "status_text"
 func _match_status_code(code: int) -> String:
 	var text: String = "OK"
 	match(code):
+		# 1xx - Informational Responses
 		100: text="Continue"
 		101: text="Switching protocols"
 		102: text="Processing"
 		103: text="Early Hints"
-
+		# 2xx - Successful Responses
 		200: text="OK"
 		201: text="Created"
 		202: text="Accepted"
@@ -30,7 +105,7 @@ func _match_status_code(code: int) -> String:
 		207: text="Multi-Status"
 		208: text="Already Reported"
 		226: text="IM Used"
-
+		# 3xx - Redirection Messages
 		300: text="Multiple Choices"
 		301: text="Moved Permanently"
 		302: text="Found (Previously 'Moved Temporarily')"
@@ -40,7 +115,7 @@ func _match_status_code(code: int) -> String:
 		306: text="Switch Proxy"
 		307: text="Temporary Redirect"
 		308: text="Permanent Redirect"
-
+		# 4xx - Client Error Responses
 		400: text="Bad Request"
 		401: text="Unauthorized"
 		402: text="Payment Required"
@@ -70,7 +145,7 @@ func _match_status_code(code: int) -> String:
 		429: text="Too Many Requests"
 		431: text="Request Header Fields Too Large"
 		451: text="Unavailable For Legal Reasons"
-
+		# 5xx - Server Error Responses
 		500: text="Internal Server Error"
 		501: text="Not Implemented"
 		502: text="Bad Gateway"
@@ -83,53 +158,3 @@ func _match_status_code(code: int) -> String:
 		510: text="Not Extended"
 		511: text="Network Authentication Required"
 	return text
-
-# Send out a response to the client
-#
-# #### Parameters
-# - status: The HTTP status code to send
-# - data: The body data to send
-# - content_type: The type of the content to send
-func send(status_code: int, data: String = "", content_type: String = "text/html") -> void:
-	client.put_data(("HTTP/1.1 %d %s\n" % [status_code, _match_status_code(status_code)]).to_ascii())
-	client.put_data(("Server: %s\n" % server_identifier).to_ascii())
-	for header in headers.keys():
-		client.put_data(("%s: %s\n" % [header, headers[header]]).to_ascii())
-	for cookie in cookies:
-		client.put_data(("Set-Cookie: %s\n" % cookie).to_ascii())
-	client.put_data(("Content-Length: %d\n" % data.to_ascii().size()).to_ascii())
-	client.put_data("Connection: close\n".to_ascii())
-	client.put_data(("Content-Type: %s\n\n" % content_type).to_ascii())
-	client.put_data(data.to_ascii())
-
-func json(status_code: int, data: Dictionary) -> void:
-	send(status_code, JSON.print(data), "application/json")
-
-# Sets the response’s header "field" to "value"
-#
-# @field --> the name of the header i.e. "Accept-Type"
-# @value --> the value of this header i.e. "application/json"
-func set(field: String, value: String) -> void:
-	headers[field] = value
-
-# Sets cookie "name" to "value"
-#
-# @name --> the name of the cookie i.e. "user-id"
-# @value --> the value of this cookie i.e. "abcdef"
-func cookie(name: String, value: String, options: Dictionary = {}) -> void:
-	var cookie: String = name+"="+value
-	if options.has("domain"): cookie+="; Domain="+options["domain"]
-	if options.has("max-age"): cookie+="; Max-Age="+options["max-age"]
-	if options.has("expires"): cookie+="; Expires="+options["expires"]
-	if options.has("path"): cookie+="; Path="+options["path"]
-	if options.has("secure"): cookie+="; Secure="+options["secure"]
-	if options.has("httpOnly"): cookie+="; HttpOnly="+options["httpOnly"]
-	if options.has("path"): cookie+="; Path="+options["path"]
-	if options.has("sameSite"): 
-		match (options["sameSite"]):
-			true: cookie += "; SameSite=Strict"
-			"lax": cookie += "; SameSite=Lax"
-			"strict": cookie += "; SameSite=Strict"
-			"none": cookie += "; SameSite=None"
-			_: pass
-	cookies.append(cookie)
