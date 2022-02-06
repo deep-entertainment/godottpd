@@ -110,7 +110,14 @@ func _handle_request(client: StreamPeer, request_string: String):
 		var header_matches = _header_regex.search(line)
 		if method_matches:
 			request.method = method_matches.get_string("method")
-			request.path = method_matches.get_string("path")
+			var request_path: String = method_matches.get_string("path")
+			# Check if request_path contains "?" character, could be a query parameter
+			if not "?" in request_path:
+				request.path = request_path
+			else:
+				var path_query: PoolStringArray = request_path.split("?")
+				request.path = path_query[0]
+				request.query = _extract_query_params(path_query[1])
 			request.headers = {}
 			request.body = ""
 		elif header_matches:
@@ -219,3 +226,30 @@ func _path_to_regexp(path: String) -> Array:
 			regexp+="/"+fragment
 	regexp+="[/#?]?$"
 	return [regexp, params]
+
+
+# Extracts query parameters from a String query, 
+# building a Query Dictionary of param:value pairs
+#
+# #### Parameters
+# @query_string --> the query string, extracted from the HttpRequest.path
+#
+# #### Returns
+# @Dictionary --> A Dictionary of param:value pairs
+func _extract_query_params(query_string: String) -> Dictionary:
+	var query: Dictionary = {}
+	if query_string == "":
+		return query
+	var parameters: Array = query_string.split("&")
+	for param in parameters:
+		if not "=" in param:
+			continue
+		var kv : Array = param.split("=")
+		var value: String = kv[1]
+		if value.is_valid_integer():
+			query[kv[0]] = int(value)
+		elif value.is_valid_float():
+			query[kv[0]] = float(value)
+		else:
+			query[kv[0]] = value
+	return query
