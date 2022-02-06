@@ -175,8 +175,15 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 	if not found:	
 		response.send(404, "Not found")
 
+
 # Serve a file in the local system.
 # Files to be exposed are only rooted from the @_local_base_path for security
+#
+# #### Parameters
+# @request_path --> The path to the requested file. It will be taken from the `HttpRequest.path`
+# 					attribute and rooted from the @_local_base_path
+# #### Returns
+# @String --> the content of the file to be served, if it exists and is accessible, else ""
 func serve_file(request_path: String) -> String:
 	var content: String = ""
 	var file = File.new()
@@ -190,8 +197,13 @@ func serve_file(request_path: String) -> String:
 # Converts a URL path to @regexp RegExp, providing a mechanism to fetch groups from the expression
 # indexing each parameter by name in the @params array
 #
-# @regexp --> the output expression as a String, to be compiled in RegExp
-# @params --> an Array of parameters, indexed by names. Can be fetched using `RegExp.get_string()` method
+# #### Parameters
+# @path --> The path of the HttpRequest
+# 
+# #### Returns
+# @Array --> A 2D array, containing a @regexp String and Dictionary of @params
+# [0] = @regexp --> the output expression as a String, to be compiled in RegExp
+# [1] = @params --> an Array of parameters, indexed by names. Can be fetched using `RegExp.get_string()` method
 # ex. "/user/:id" --> "^/user/(?<id>([^/#?]+?))[/#?]?$"
 func _path_to_regexp(path: String) -> Array:
 	var regexp: String = "^"
