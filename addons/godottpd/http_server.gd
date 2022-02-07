@@ -102,7 +102,7 @@ func stop():
 #
 # #### Parameters
 # - client: The client that send the request
-# - request: The received request 
+# - request: The received request as a String
 func _handle_request(client: StreamPeer, request_string: String):
 	var request = HttpRequest.new()
 	for line in request_string.split("\r\n"):
@@ -187,10 +187,9 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 # Files to be exposed are only rooted from the @_local_base_path for security
 #
 # #### Parameters
-# @request_path --> The path to the requested file. It will be taken from the `HttpRequest.path`
+# - request_path: The path to the requested file. It will be taken from the `HttpRequest.path`
 # 					attribute and rooted from the @_local_base_path
-# #### Returns
-# @String --> the content of the file to be served, if it exists and is accessible, else ""
+# Returns: the content of the file to be served, if it exists and is accessible, else ""
 func serve_file(request_path: String) -> String:
 	var content: String = ""
 	var file = File.new()
@@ -205,13 +204,12 @@ func serve_file(request_path: String) -> String:
 # indexing each parameter by name in the @params array
 #
 # #### Parameters
-# @path --> The path of the HttpRequest
+# - path: The path of the HttpRequest
 # 
-# #### Returns
-# @Array --> A 2D array, containing a @regexp String and Dictionary of @params
-# [0] = @regexp --> the output expression as a String, to be compiled in RegExp
-# [1] = @params --> an Array of parameters, indexed by names. Can be fetched using `RegExp.get_string()` method
-# ex. "/user/:id" --> "^/user/(?<id>([^/#?]+?))[/#?]?$"
+# Returns: A 2D array, containing a @regexp String and Dictionary of @params
+# 			[0] = @regexp --> the output expression as a String, to be compiled in RegExp
+# 			[1] = @params --> an Array of parameters, indexed by names
+# 			ex. "/user/:id" --> "^/user/(?<id>([^/#?]+?))[/#?]?$"
 func _path_to_regexp(path: String) -> Array:
 	var regexp: String = "^"
 	var params: Array = []
@@ -220,11 +218,11 @@ func _path_to_regexp(path: String) -> Array:
 	for fragment in fragments:
 		if fragment.left(1) == ":":
 			fragment = fragment.lstrip(":")
-			regexp+="/(?<%s>([^/#?]+?))"%fragment
+			regexp += "/(?<%s>([^/#?]+?))" % fragment
 			params.append(fragment)
 		else:
-			regexp+="/"+fragment
-	regexp+="[/#?]?$"
+			regexp += "/" + fragment
+	regexp += "[/#?]?$"
 	return [regexp, params]
 
 
@@ -232,10 +230,9 @@ func _path_to_regexp(path: String) -> Array:
 # building a Query Dictionary of param:value pairs
 #
 # #### Parameters
-# @query_string --> the query string, extracted from the HttpRequest.path
+# - query_string: the query string, extracted from the HttpRequest.path
 #
-# #### Returns
-# @Dictionary --> A Dictionary of param:value pairs
+# Returns: A Dictionary of param:value pairs
 func _extract_query_params(query_string: String) -> Dictionary:
 	var query: Dictionary = {}
 	if query_string == "":

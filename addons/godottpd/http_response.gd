@@ -22,8 +22,8 @@ var cookies: Array = []
 #
 # #### Parameters
 # - status: The HTTP status code to send
-# - data: The body data to send
-# - content_type: The type of the content to send
+# - data: The body data to send [""]
+# - content_type: The type of the content to send ["text/html"]
 func send(status_code: int, data: String = "", content_type: String = "text/html") -> void:
 	client.put_data(("HTTP/1.1 %d %s\n" % [status_code, _match_status_code(status_code)]).to_ascii())
 	client.put_data(("Server: %s\n" % server_identifier).to_ascii())
@@ -41,8 +41,8 @@ func send(status_code: int, data: String = "", content_type: String = "text/html
 # This function will internally call the `send()` method 
 #
 # #### Parameters
-# @status_code --> The HTTP status code to send
-# @data --> The body data to send, must be a Dictionary or an Array
+# - status_code: The HTTP status code to send
+# - data: The body data to send, must be a Dictionary or an Array
 func json(status_code: int, data) -> void:
 	send(status_code, JSON.print(data), "application/json")
 
@@ -50,16 +50,19 @@ func json(status_code: int, data) -> void:
 # Sets the response’s header "field" to "value"
 #
 # #### Parameters
-# @field --> the name of the header i.e. "Accept-Type"
-# @value --> the value of this header i.e. "application/json"
+# - field: the name of the header i.e. "Accept-Type"
+# - value: the value of this header i.e. "application/json"
 func set(field: String, value: String) -> void:
 	headers[field] = value
 
 
 # Sets cookie "name" to "value"
 #
-# @name --> the name of the cookie i.e. "user-id"
-# @value --> the value of this cookie i.e. "abcdef"
+# #### Parameters
+# - name: the name of the cookie i.e. "user-id"
+# - value: the value of this cookie i.e. "abcdef"
+# - options: a Dictionary of ![cookie attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) 
+#			 for this specific cookie, in the { "secure" : "true" } format 
 func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 	var cookie: String = name+"="+value
 	if options.has("domain"): cookie+="; Domain="+options["domain"]
@@ -82,10 +85,9 @@ func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 # Automatically matches a "status_code" to an RFC 7231 compliant "status_text"
 #
 # #### Parameters
-# @code --> HTTP Status Code to be matched
+# - code: HTTP Status Code to be matched
 # 
-# #### Returns
-# @String --> the matched "status_text"
+# Returns: the matched "status_text"
 func _match_status_code(code: int) -> String:
 	var text: String = "OK"
 	match(code):
