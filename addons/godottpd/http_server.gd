@@ -2,8 +2,8 @@
 extends Node
 class_name HttpServer
 
-# If debug messages should be printed in console on requests
-var _debug: bool = false
+# If `HttpRequest`s and `HttpResponse`s should be logged
+var _logging: bool = false
 
 # The ip address to bind the server to. Use * for all IP addresses [*]
 var bind_address: String = "*"
@@ -40,11 +40,13 @@ func _init(_debug: bool = false) -> void:
 	_header_regex.compile("^(?<key>[^:]+): (?<value>.+)$")
 
 # Print a debug message in console, if the debug mode is enabled
+# 
+# #### Parameters
+# - message: The message to be printed (only in debug mode)
 func _print_debug(message: String) -> void:
-	if _debug:
-		var time = OS.get_datetime()
-		var time_return = "%02d-%02d-%02d %02d:%02d:%02d" % [time.year, time.month, time.day, time.hour, time.minute, time.second]
-		print("[SERVER] ",time_return," >> ", message)
+	var time = OS.get_datetime()
+	var time_return = "%02d-%02d-%02d %02d:%02d:%02d" % [time.year, time.month, time.day, time.hour, time.minute, time.second]
+	print_debug("[SERVER] ",time_return," >> ", message)
 
 # Register a new router to handle a specific path
 #
