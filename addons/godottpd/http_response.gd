@@ -18,24 +18,33 @@ var headers: Dictionary = {}
 # Cookies will be automatically sent via "Set-Cookie" headers to clients
 var cookies: Array = []
 
-# Send out a response to the client
+# Send out a raw (Bytes) response to the client
+# Useful to send files faster or raw data which will be converted by the client
 #
 # #### Parameters
 # - status: The HTTP status code to send
-# - data: The body data to send [""]
+# - data: The body data to send []
 # - content_type: The type of the content to send ["text/html"]
-func send(status_code: int, data: String = "", content_type: String = "text/html") -> void:
+func send_raw(status_code: int, data: PoolByteArray = [], content_type: String = "application/octet-stream") -> void:
 	client.put_data(("HTTP/1.1 %d %s\n" % [status_code, _match_status_code(status_code)]).to_ascii())
 	client.put_data(("Server: %s\n" % server_identifier).to_ascii())
 	for header in headers.keys():
 		client.put_data(("%s: %s\n" % [header, headers[header]]).to_ascii())
 	for cookie in cookies:
 		client.put_data(("Set-Cookie: %s\n" % cookie).to_ascii())
-	client.put_data(("Content-Length: %d\n" % data.to_ascii().size()).to_ascii())
+	client.put_data(("Content-Length: %d\n" % data.size()).to_ascii())
 	client.put_data("Connection: close\n".to_ascii())
 	client.put_data(("Content-Type: %s\n\n" % content_type).to_ascii())
-	client.put_data(data.to_ascii())
+	client.put_data(data)
 
+# Send out a response to the client
+#
+# #### Parameters
+# - status: The HTTP status code to send
+# - data: The body data to send []
+# - content_type: The type of the content to send ["text/html"]
+func send(status_code: int, data: String = "", content_type = "text/html") -> void:
+	send_raw(status_code, data.to_ascii(), content_type)
 
 # Send out a JSON response to the client
 # This function will internally call the `send()` method 

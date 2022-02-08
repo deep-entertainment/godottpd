@@ -34,8 +34,8 @@ var _header_regex: RegEx = RegEx.new()
 var _local_base_path: String = "res://src"
 
 # Compile the required regex
-func _init(_debug: bool = false) -> void:
-	self._debug = _debug
+func _init(_logging: bool = false) -> void:
+	self._logging = _logging
 	_method_regex.compile("^(?<method>GET|POST|HEAD|PUT|PATCH|DELETE|OPTIONS) (?<path>[^ ]+) HTTP/1.1$")
 	_header_regex.compile("^(?<key>[^:]+): (?<value>.+)$")
 
@@ -60,7 +60,7 @@ func register_router(path: String, router: HttpRouter):
 	if path.left(0) == "^":
 		path_regex.compile(path)
 	else:
-		var regexp: Array = _path_to_regexp(path)
+		var regexp: Array = _path_to_regexp(path, router is HttpFileRouter)
 		path_regex.compile(regexp[0])
 		params = regexp[1]
 	_routers.push_back({
@@ -150,6 +150,8 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 		var matches = router.path.search(request.path)
 		if matches:
 			request.query_match = matches
+			if request.query_match.get_string("subpath"):
+				request.path = request.query_match.get_string("subpath")
 			if router.params.size() > 0:
 				for parameter in router.params:
 					request.parameters[parameter] = request.query_match.get_string(parameter)
@@ -175,31 +177,8 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 				"OPTIONS":
 					found = true
 					router.router.handle_options(request, response)
-	if not found:
-		if not request.path.get_extension() in ["gd"]:
-			var content: String = serve_file(request.path)
-			if content != "":
-				found = true
-				response.send(200, content, "text/"+request.path.get_extension())
 	if not found:	
 		response.send(404, "Not found")
-
-
-# Serve a file in the local system.
-# Files to be exposed are only rooted from the @_local_base_path for security
-#
-# #### Parameters
-# - request_path: The path to the requested file. It will be taken from the `HttpRequest.path`
-# 					attribute and rooted from the @_local_base_path
-# Returns: the content of the file to be served, if it exists and is accessible, else ""
-func serve_file(request_path: String) -> String:
-	var content: String = ""
-	var file = File.new()
-	var file_opened: bool = not bool(file.open(_local_base_path+"/"+request_path, File.READ))
-	if file_opened:
-		content = file.get_as_text()
-		file.close()
-	return content
 
 
 # Converts a URL path to @regexp RegExp, providing a mechanism to fetch groups from the expression
@@ -207,12 +186,14 @@ func serve_file(request_path: String) -> String:
 #
 # #### Parameters
 # - path: The path of the HttpRequest
+# - should_match_subfolder: (dafult [false]) if subfolders should be matched and grouped, 
+#							used for HttpFileRouter
 # 
 # Returns: A 2D array, containing a @regexp String and Dictionary of @params
 # 			[0] = @regexp --> the output expression as a String, to be compiled in RegExp
 # 			[1] = @params --> an Array of parameters, indexed by names
 # 			ex. "/user/:id" --> "^/user/(?<id>([^/#?]+?))[/#?]?$"
-func _path_to_regexp(path: String) -> Array:
+func _path_to_regexp(path: String, should_match_subfolders: bool = false) -> Array:
 	var regexp: String = "^"
 	var params: Array = []
 	var fragments: Array = path.split("/")
@@ -224,7 +205,7 @@ func _path_to_regexp(path: String) -> Array:
 			params.append(fragment)
 		else:
 			regexp += "/" + fragment
-	regexp += "[/#?]?$"
+	regexp += "[/#?]?$" if not should_match_subfolders else "(?<subpath>$|/.*)" 
 	return [regexp, params]
 
 

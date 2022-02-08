@@ -24,6 +24,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://addons/godottpd/http_router.gd"
 }, {
+"base": "Object",
+"class": "HttpFileRouter",
+"language": "GDScript",
+"path": "res://addons/godottpd/http_file_router.gd"
+}, {
 "base": "Node",
 "class": "HttpServer",
 "language": "GDScript",
