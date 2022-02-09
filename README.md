@@ -36,6 +36,7 @@ Further information can be found in the API documentation:
 - [HttpResponse](docs/api/HttpResponse.md)
 - [HttpRouter](docs/api/HttpRouter.md)
 - [HttpServer](docs/api/HttpServer.md)
+- [HttpFileRouter](docs/api/HttpFileRouter.md)
 
 ## Issues and feature requests
 
