@@ -1,5 +1,5 @@
 # An HTTP request received by the server
-extends Object
+extends Reference
 class_name HttpRequest
 
 
@@ -17,3 +17,13 @@ var path: String
 
 # The method
 var method: String
+
+# A dictionary of request (aka. routing) parameters
+var parameters: Dictionary
+
+# A dictionary of request query parameters
+var query: Dictionary
+
+# Override `str()` method, automatically called in `print()` function
+func _to_string() -> String:
+    return JSON.print({headers=headers, method=method, path=path})

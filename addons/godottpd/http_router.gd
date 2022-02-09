@@ -1,5 +1,5 @@
 # A base class for all HTTP routers
-extends Object
+extends Reference
 class_name HttpRouter
 
 
