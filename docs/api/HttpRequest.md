@@ -2,7 +2,7 @@
 
 # HttpRequest
 
-**Extends:** [Object](../Object)
+**Extends:** [Reference](../Reference)
 
 ## Description
 
@@ -49,3 +49,19 @@ var method: String
 ```
 
 The method
+
+### parameters
+
+```gdscript
+var parameters: Dictionary
+```
+
+A dictionary of request (aka. routing) parameters
+
+### query
+
+```gdscript
+var query: Dictionary
+```
+
+A dictionary of request query parameters

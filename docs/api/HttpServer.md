@@ -36,6 +36,14 @@ The server identifier to use when responding to requests [GodotTPD]
 
 ## Method Descriptions
 
+### \_init
+
+```gdscript
+func _init(_logging: bool = false) -> void
+```
+
+Compile the required regex
+
 ### register\_router
 
 ```gdscript
