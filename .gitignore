@@ -1,3 +1,4 @@
 .import
 .godot
 logs/
+**/*.import
