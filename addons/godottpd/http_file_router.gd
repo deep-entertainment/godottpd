@@ -10,10 +10,10 @@ var fallback_page: String = ""
 
 # An ordered list of extensions that will be checked 
 # if no file extension is provided by the request
-var extensions: PoolStringArray = ["html"]
+var extensions: PackedStringArray = ["html"]
 
 # A list of extensions that will be excluded if requested
-var exclude_extensions: PoolStringArray = []
+var exclude_extensions: PackedStringArray = []
 
 # Creates an HttpFileRouter intance
 #
@@ -66,8 +66,8 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 #
 # #### Parameters
 # - file_path: Full path to the file
-func _serve_file(file_path: String) -> PoolByteArray:
-	var content: PoolByteArray = []
+func _serve_file(file_path: String) -> PackedByteArray:
+	var content: PackedByteArray = []
 	var file = File.new()
 	var file_opened: bool = not bool(file.open(file_path, File.READ))
 	if file_opened:

@@ -1,5 +1,5 @@
 # A response object useful to send out responses
-extends Reference
+extends RefCounted
 class_name HttpResponse
 
 
@@ -25,16 +25,16 @@ var cookies: Array = []
 # - status: The HTTP status code to send
 # - data: The body data to send []
 # - content_type: The type of the content to send ["text/html"]
-func send_raw(status_code: int, data: PoolByteArray = [], content_type: String = "application/octet-stream") -> void:
-	client.put_data(("HTTP/1.1 %d %s\n" % [status_code, _match_status_code(status_code)]).to_ascii())
-	client.put_data(("Server: %s\n" % server_identifier).to_ascii())
+func send_raw(status_code: int, data := PackedByteArray([]), content_type: String = "application/octet-stream") -> void:
+	client.put_data(("HTTP/1.1 %d %s\n" % [status_code, _match_status_code(status_code)]).to_ascii_buffer())
+	client.put_data(("Server: %s\n" % server_identifier).to_ascii_buffer())
 	for header in headers.keys():
-		client.put_data(("%s: %s\n" % [header, headers[header]]).to_ascii())
+		client.put_data(("%s: %s\n" % [header, headers[header]]).to_ascii_buffer())
 	for cookie in cookies:
-		client.put_data(("Set-Cookie: %s\n" % cookie).to_ascii())
-	client.put_data(("Content-Length: %d\n" % data.size()).to_ascii())
-	client.put_data("Connection: close\n".to_ascii())
-	client.put_data(("Content-Type: %s\n\n" % content_type).to_ascii())
+		client.put_data(("Set-Cookie: %s\n" % cookie).to_ascii_buffer())
+	client.put_data(("Content-Length: %d\n" % data.size()).to_ascii_buffer())
+	client.put_data("Connection: close\n".to_ascii_buffer())
+	client.put_data(("Content-Type: %s\n\n" % content_type).to_ascii_buffer())
 	client.put_data(data)
 
 # Send out a response to the client
@@ -44,7 +44,7 @@ func send_raw(status_code: int, data: PoolByteArray = [], content_type: String =
 # - data: The body data to send []
 # - content_type: The type of the content to send ["text/html"]
 func send(status_code: int, data: String = "", content_type = "text/html") -> void:
-	send_raw(status_code, data.to_ascii(), content_type)
+	send_raw(status_code, data.to_ascii_buffer(), content_type)
 
 # Send out a JSON response to the client
 # This function will internally call the `send()` method 
@@ -61,7 +61,7 @@ func json(status_code: int, data) -> void:
 # #### Parameters
 # - field: the name of the header i.e. "Accept-Type"
 # - value: the value of this header i.e. "application/json"
-func set(field: String, value: String) -> void:
+func set(field: String, value: Variant) -> void:
 	headers[field] = value
 
 

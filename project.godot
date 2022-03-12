@@ -6,41 +6,46 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
+config_version=5
 
-_global_script_classes=[ {
-"base": "Object",
-"class": "HttpRequest",
-"language": "GDScript",
-"path": "res://addons/godottpd/http_request.gd"
-}, {
-"base": "Object",
-"class": "HttpResponse",
-"language": "GDScript",
-"path": "res://addons/godottpd/http_response.gd"
-}, {
-"base": "Object",
-"class": "HttpRouter",
-"language": "GDScript",
-"path": "res://addons/godottpd/http_router.gd"
-}, {
-"base": "Object",
-"class": "HttpFileRouter",
-"language": "GDScript",
+_global_script_classes=[{
+"base": "HttpRouter",
+"class": &"HttpFileRouter",
+"language": &"GDScript",
 "path": "res://addons/godottpd/http_file_router.gd"
 }, {
+"base": "RefCounted",
+"class": &"HttpRequest",
+"language": &"GDScript",
+"path": "res://addons/godottpd/http_request.gd"
+}, {
+"base": "RefCounted",
+"class": &"HttpResponse",
+"language": &"GDScript",
+"path": "res://addons/godottpd/http_response.gd"
+}, {
+"base": "RefCounted",
+"class": &"HttpRouter",
+"language": &"GDScript",
+"path": "res://addons/godottpd/http_router.gd"
+}, {
 "base": "Node",
-"class": "HttpServer",
-"language": "GDScript",
+"class": &"HttpServer",
+"language": &"GDScript",
 "path": "res://addons/godottpd/http_server.gd"
-} ]
+}]
 _global_script_class_icons={
+"HttpFileRouter": "",
 "HttpRequest": "",
 "HttpResponse": "",
 "HttpRouter": "",
 "HttpServer": ""
 }
 
+[application]
+
+config/features=PackedStringArray("4.0")
+
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/godottpd/plugin.cfg" )
+enabled=PackedStringArray()

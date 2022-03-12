@@ -16,7 +16,7 @@ var server_identifier: String = "GodotTPD"
 
 
 # The TCP server instance used
-var _server: TCP_Server
+var _server: TCPServer
 
 # An array of StraemPeerTCP objects who are currently talking to the server
 var _clients: Array
@@ -86,7 +86,7 @@ func _process(_delta: float) -> void:
 
 # Start the server
 func start():
-	self._server = TCP_Server.new()
+	self._server = TCPServer.new()
 	self._server.listen(self.port, self.bind_address)
 	_print_debug("Server listening on http://%s:%s" % [self.bind_address, self.port])
 
@@ -117,7 +117,7 @@ func _handle_request(client: StreamPeer, request_string: String):
 			if not "?" in request_path:
 				request.path = request_path
 			else:
-				var path_query: PoolStringArray = request_path.split("?")
+				var path_query: PackedStringArray = request_path.split("?")
 				request.path = path_query[0]
 				request.query = _extract_query_params(path_query[1])
 			request.headers = {}
@@ -226,10 +226,10 @@ func _extract_query_params(query_string: String) -> Dictionary:
 			continue
 		var kv : Array = param.split("=")
 		var value: String = kv[1]
-		if value.is_valid_integer():
-			query[kv[0]] = int(value)
+		if value.is_valid_int():
+			query[kv[0]] = value.to_int()
 		elif value.is_valid_float():
-			query[kv[0]] = float(value)
+			query[kv[0]] = value.to_float()
 		else:
 			query[kv[0]] = value
 	return query
