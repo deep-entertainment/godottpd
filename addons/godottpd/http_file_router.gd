@@ -61,7 +61,6 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 		else:
 			response.send_raw(404)
 
-# (Internal function)
 # Reads a file as text
 #
 # #### Parameters
@@ -77,7 +76,6 @@ func _serve_file(file_path: String) -> PoolByteArray:
 	file.close()
 	return content
 
-# (Internal Function)
 # Check if a file exists
 #
 # #### Parameters
