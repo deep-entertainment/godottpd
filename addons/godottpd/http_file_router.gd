@@ -83,7 +83,6 @@ func _serve_file(file_path: String) -> PoolByteArray:
 func _file_exists(file_path: String) -> bool:
 	return File.new().file_exists(file_path)
 
-# (Internal function)
 # Get the full MIME type of a file from its extension
 #
 # #### Parameters
