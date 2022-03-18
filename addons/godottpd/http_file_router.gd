@@ -61,7 +61,6 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 		else:
 			response.send_raw(404)
 
-# (Internal function)
 # Reads a file as text
 #
 # #### Parameters
@@ -69,13 +68,14 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 func _serve_file(file_path: String) -> PoolByteArray:
 	var content: PoolByteArray = []
 	var file = File.new()
-	var file_opened: bool = not bool(file.open(file_path, File.READ))
-	if file_opened:
+	var error: int = file.open(file_path, File.READ)
+	if error:
+		content = ("Couldn't serve file, ERROR = %s" % error).to_ascii()
+	else:
 		content = file.get_buffer(file.get_len())
-		file.close()
+	file.close()
 	return content
 
-# (Internal Function)
 # Check if a file exists
 #
 # #### Parameters
@@ -83,7 +83,6 @@ func _serve_file(file_path: String) -> PoolByteArray:
 func _file_exists(file_path: String) -> bool:
 	return File.new().file_exists(file_path)
 
-# (Internal function)
 # Get the full MIME type of a file from its extension
 #
 # #### Parameters
