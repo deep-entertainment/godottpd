@@ -20,11 +20,12 @@ func handle_get(request, response):
 
 This router would respond to a GET [request](HttpRequest.md) on its path and send back a [response](HttpResponse.md) with a 200 status code and the body "Hello!".
 
-Afterwards, create a new [HttpServer](HttpServer.md), add the router and start the server.
+Afterwards, create a new [HttpServer](HttpServer.md), add the router and start the server. This needs to be called from a node in the SceneTree.
 
 ```python
 var server = HttpServer.new()
 server.register_router("/", MyExampleRouter.new())
+add_child(server)
 server.start()
 ```
 
