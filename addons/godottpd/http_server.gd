@@ -93,8 +93,7 @@ func start():
 	match err:
 		22:
 			_print_debug("Could not bind to port %d, already in use" % [self.port])
-			self._server.stop()
-			set_process(false)
+			stop()
 		_:
 			_print_debug("Server listening on http://%s:%s" % [self.bind_address, self.port])
 
