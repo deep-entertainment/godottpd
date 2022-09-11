@@ -5,7 +5,10 @@ class_name HttpFileRouter
 # Full path to the folder which will be exposed to web
 var path: String = ""
 
-# Full path to the fallback page which will be served if the requested file was not found
+# Relative path to the index page, which will be served when a request is made to "/" (server root)
+var index_page: String = "index.html"
+
+# Relative path to the fallback page which will be served if the requested file was not found
 var fallback_page: String = ""
 
 # An ordered list of extensions that will be checked 
@@ -26,12 +29,14 @@ var exclude_extensions: PoolStringArray = []
 func _init(
 	path: String, 
 	options: Dictionary = { 
+		index_page = index_page,
 		fallback_page = fallback_page, 
 		extensions = extensions, 
-		exclude_extensions = exclude_extensions
+		exclude_extensions = exclude_extensions,
 	}
 	) -> void:
 	self.path = path
+	self.index_page = options.get("index_page", "")
 	self.fallback_page = options.get("fallback_page", "")
 	self.extensions = options.get("extensions", [])
 	self.exclude_extensions = options.get("exclude_extensions", [])
@@ -41,6 +46,11 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 	var serving_path: String = path + request.path
 	var file_exists: bool = _file_exists(serving_path)
 
+	if request.path == "/" and not file_exists:
+		if not index_page.empty():
+			serving_path = path + "/" + index_page
+			file_exists = _file_exists(serving_path)
+	
 	if request.path.get_extension() == "" and not file_exists:
 		for extension in extensions:
 			serving_path = path + request.path + "." + extension
@@ -56,8 +66,9 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 			_get_mime(serving_path.get_extension())
 			)
 	else:
-		if fallback_page != "":
-			response.send_raw(404, _serve_file(fallback_page), _get_mime(fallback_page.get_extension()))
+		if not fallback_page.empty():
+			serving_path = path + "/" + fallback_page
+			response.send_raw(200 if index_page == fallback_page else 404, _serve_file(serving_path), _get_mime(fallback_page.get_extension()))
 		else:
 			response.send_raw(404)
 
