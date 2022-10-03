@@ -33,7 +33,7 @@ func send_raw(status_code: int, data: PoolByteArray = [], content_type: String =
 	for cookie in cookies:
 		client.put_data(("Set-Cookie: %s\r\n" % cookie).to_ascii())
 	client.put_data(("Content-Length: %d\r\n" % data.size()).to_ascii())
-	client.put_data("Connection: close\r\n".to_scii())
+	client.put_data("Connection: close\r\n".to_ascii())
 	client.put_data(("Content-Type: %s\r\n\r\n" % content_type).to_ascii())
 	client.put_data(data)
 
