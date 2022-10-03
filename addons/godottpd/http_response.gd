@@ -26,15 +26,15 @@ var cookies: Array = []
 # - data: The body data to send []
 # - content_type: The type of the content to send ["text/html"]
 func send_raw(status_code: int, data: PoolByteArray = [], content_type: String = "application/octet-stream") -> void:
-	client.put_data(("HTTP/1.1 %d %s\n" % [status_code, _match_status_code(status_code)]).to_ascii())
-	client.put_data(("Server: %s\n" % server_identifier).to_ascii())
+	client.put_data(("HTTP/1.1 %d %s\r\n" % [status_code, _match_status_code(status_code)]).to_ascii())
+	client.put_data(("Server: %s\r\n" % server_identifier).to_ascii())
 	for header in headers.keys():
-		client.put_data(("%s: %s\n" % [header, headers[header]]).to_ascii())
+		client.put_data(("%s: %s\r\n" % [header, headers[header]]).to_ascii())
 	for cookie in cookies:
-		client.put_data(("Set-Cookie: %s\n" % cookie).to_ascii())
-	client.put_data(("Content-Length: %d\n" % data.size()).to_ascii())
-	client.put_data("Connection: close\n".to_ascii())
-	client.put_data(("Content-Type: %s\n\n" % content_type).to_ascii())
+		client.put_data(("Set-Cookie: %s\r\n" % cookie).to_ascii())
+	client.put_data(("Content-Length: %d\r\n" % data.size()).to_ascii())
+	client.put_data("Connection: close\r\n".to_ascii())
+	client.put_data(("Content-Type: %s\r\n\r\n" % content_type).to_ascii())
 	client.put_data(data)
 
 # Send out a response to the client
