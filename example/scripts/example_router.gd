@@ -7,8 +7,12 @@ func handle_get(request: HttpRequest, response: HttpResponse):
 
 # Handle a POST request
 func handle_post(request: HttpRequest, response: HttpResponse) -> void:
-	print_debug(">>>>>>>The body: %s" % request.body)
-	response.send(200, "Hello! from POST")
+	response.send(200, JSON.stringify({
+		message = "Hello! from POST",
+		raw_body = request.body,
+		parsed_body = request.get_body_parsed(),
+		params = request.query
+	}), "application/json")
 
 # Handle a PUT request
 func handle_put(request: HttpRequest, response: HttpResponse) -> void:

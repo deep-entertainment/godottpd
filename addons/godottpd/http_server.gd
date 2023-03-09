@@ -38,7 +38,7 @@ func _init(_logging: bool = false):
 	self._logging = _logging
 	set_process(false)
 	_method_regex.compile("^(?<method>GET|POST|HEAD|PUT|PATCH|DELETE|OPTIONS) (?<path>[^ ]+) HTTP/1.1$")
-	_header_regex.compile("^(?<key>[^:]+): (?<value>.+)$")
+	_header_regex.compile("^(?<key>[\\w-]+): (?<value>(.*))$")
 
 # Print a debug message in console, if the debug mode is enabled
 # 
