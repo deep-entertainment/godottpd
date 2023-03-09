@@ -1,5 +1,5 @@
 # A base class for all HTTP routers
-extends Reference
+extends RefCounted
 class_name HttpRouter
 
 

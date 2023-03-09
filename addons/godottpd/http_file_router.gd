@@ -11,12 +11,12 @@ var index_page: String = "index.html"
 # Relative path to the fallback page which will be served if the requested file was not found
 var fallback_page: String = ""
 
-# An ordered list of extensions that will be checked 
+# An ordered list of extensions that will be checked
 # if no file extension is provided by the request
-var extensions: PoolStringArray = ["html"]
+var extensions: PackedStringArray = ["html"]
 
 # A list of extensions that will be excluded if requested
-var exclude_extensions: PoolStringArray = []
+var exclude_extensions: PackedStringArray = []
 
 # Creates an HttpFileRouter intance
 #
@@ -27,11 +27,11 @@ var exclude_extensions: PoolStringArray = []
 #	- extensions: A list of extensions that will be checked if no file extension is provided by the request
 # 	- exclude_extensions: A list of extensions that will be excluded if requested
 func _init(
-	path: String, 
-	options: Dictionary = { 
+	path: String,
+	options: Dictionary = {
 		index_page = index_page,
-		fallback_page = fallback_page, 
-		extensions = extensions, 
+		fallback_page = fallback_page,
+		extensions = extensions,
 		exclude_extensions = exclude_extensions,
 	}
 	) -> void:
@@ -47,26 +47,26 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 	var file_exists: bool = _file_exists(serving_path)
 
 	if request.path == "/" and not file_exists:
-		if not index_page.empty():
+		if index_page.length() > 0:
 			serving_path = path + "/" + index_page
 			file_exists = _file_exists(serving_path)
-	
+
 	if request.path.get_extension() == "" and not file_exists:
 		for extension in extensions:
 			serving_path = path + request.path + "." + extension
 			file_exists = _file_exists(serving_path)
-			if file_exists: 
+			if file_exists:
 				break
 
 	# GDScript must be excluded, unless it is used as a preprocessor (php-like)
 	if (file_exists and not serving_path.get_extension() in ["gd"] + Array(exclude_extensions)):
 		response.send_raw(
-			200, 
-			_serve_file(serving_path), 
+			200,
+			_serve_file(serving_path),
 			_get_mime(serving_path.get_extension())
 			)
 	else:
-		if not fallback_page.empty():
+		if fallback_page.length() > 0:
 			serving_path = path + "/" + fallback_page
 			response.send_raw(200 if index_page == fallback_page else 404, _serve_file(serving_path), _get_mime(fallback_page.get_extension()))
 		else:
@@ -76,14 +76,14 @@ func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 #
 # #### Parameters
 # - file_path: Full path to the file
-func _serve_file(file_path: String) -> PoolByteArray:
-	var content: PoolByteArray = []
-	var file = File.new()
-	var error: int = file.open(file_path, File.READ)
+func _serve_file(file_path: String) -> PackedByteArray:
+	var content: PackedByteArray = []
+	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
+	var error = file.get_open_error()
 	if error:
-		content = ("Couldn't serve file, ERROR = %s" % error).to_ascii()
+		content = ("Couldn't serve file, ERROR = %s" % error).to_ascii_buffer()
 	else:
-		content = file.get_buffer(file.get_len())
+		content = file.get_buffer(file.get_length())
 	file.close()
 	return content
 
@@ -92,7 +92,7 @@ func _serve_file(file_path: String) -> PoolByteArray:
 # #### Parameters
 # - file_path: Full path to the file
 func _file_exists(file_path: String) -> bool:
-	return File.new().file_exists(file_path)
+	return FileAccess.file_exists(file_path)
 
 # Get the full MIME type of a file from its extension
 #
@@ -105,7 +105,7 @@ func _get_mime(file_extension: String) -> String:
 		# Web files
 		"css","html","csv","js","mjs":
 			type = "text"
-			subtype = "javascript" if file_extension in ["js","mjs"] else file_extension 
+			subtype = "javascript" if file_extension in ["js","mjs"] else file_extension
 		"php":
 			subtype = "x-httpd-php"
 		"ttf","woff","woff2":

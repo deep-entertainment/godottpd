@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://wxsnly53pi3d"]
+
+[ext_resource type="Script" path="res://example/scripts/godot_http_server_example.gd" id="1_bq8lx"]
+
+[node name="HttpServer" type="Node"]
+script = ExtResource("1_bq8lx")
