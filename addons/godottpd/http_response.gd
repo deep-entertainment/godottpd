@@ -77,7 +77,7 @@ func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 	if options.has("domain"): cookie+="; Domain="+options["domain"]
 	if options.has("max-age"): cookie+="; Max-Age="+options["max-age"]
 	if options.has("expires"): cookie+="; Expires="+options["expires"]
-	if options.has("path"): cookie+="; Path3D="+options["path"]
+	if options.has("path"): cookie+="; Path="+options["path"]
 	if options.has("secure"): cookie+="; Secure="+options["secure"]
 	if options.has("httpOnly"): cookie+="; HttpOnly="+options["httpOnly"]
 	if options.has("sameSite"):
