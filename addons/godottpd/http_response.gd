@@ -1,5 +1,5 @@
 # A response object useful to send out responses
-extends Reference
+extends RefCounted
 class_name HttpResponse
 
 
@@ -25,16 +25,16 @@ var cookies: Array = []
 # - status: The HTTP status code to send
 # - data: The body data to send []
 # - content_type: The type of the content to send ["text/html"]
-func send_raw(status_code: int, data: PoolByteArray = [], content_type: String = "application/octet-stream") -> void:
-	client.put_data(("HTTP/1.1 %d %s\r\n" % [status_code, _match_status_code(status_code)]).to_ascii())
-	client.put_data(("Server: %s\r\n" % server_identifier).to_ascii())
+func send_raw(status_code: int, data: PackedByteArray = PackedByteArray([]), content_type: String = "application/octet-stream") -> void:
+	client.put_data(("HTTP/1.1 %d %s\r\n" % [status_code, _match_status_code(status_code)]).to_ascii_buffer())
+	client.put_data(("Server: %s\r\n" % server_identifier).to_ascii_buffer())
 	for header in headers.keys():
-		client.put_data(("%s: %s\r\n" % [header, headers[header]]).to_ascii())
+		client.put_data(("%s: %s\r\n" % [header, headers[header]]).to_ascii_buffer())
 	for cookie in cookies:
-		client.put_data(("Set-Cookie: %s\r\n" % cookie).to_ascii())
-	client.put_data(("Content-Length: %d\r\n" % data.size()).to_ascii())
-	client.put_data("Connection: close\r\n".to_ascii())
-	client.put_data(("Content-Type: %s\r\n\r\n" % content_type).to_ascii())
+		client.put_data(("Set-Cookie: %s\r\n" % cookie).to_ascii_buffer())
+	client.put_data(("Content-Length: %d\r\n" % data.size()).to_ascii_buffer())
+	client.put_data("Connection: close\r\n".to_ascii_buffer())
+	client.put_data(("Content-Type: %s\r\n\r\n" % content_type).to_ascii_buffer())
 	client.put_data(data)
 
 # Send out a response to the client
@@ -44,16 +44,16 @@ func send_raw(status_code: int, data: PoolByteArray = [], content_type: String =
 # - data: The body data to send []
 # - content_type: The type of the content to send ["text/html"]
 func send(status_code: int, data: String = "", content_type = "text/html") -> void:
-	send_raw(status_code, data.to_ascii(), content_type)
+	send_raw(status_code, data.to_ascii_buffer(), content_type)
 
 # Send out a JSON response to the client
-# This function will internally call the `send()` method 
+# This function will internally call the `send()` method
 #
 # #### Parameters
 # - status_code: The HTTP status code to send
 # - data: The body data to send, must be a Dictionary or an Array
 func json(status_code: int, data) -> void:
-	send(status_code, JSON.print(data), "application/json")
+	send(status_code, JSON.stringify(data), "application/json")
 
 
 # Sets the response’s header "field" to "value"
@@ -61,7 +61,7 @@ func json(status_code: int, data) -> void:
 # #### Parameters
 # - field: the name of the header i.e. "Accept-Type"
 # - value: the value of this header i.e. "application/json"
-func set(field: String, value: String) -> void:
+func set(field: StringName, value: Variant) -> void:
 	headers[field] = value
 
 
@@ -70,8 +70,8 @@ func set(field: String, value: String) -> void:
 # #### Parameters
 # - name: the name of the cookie i.e. "user-id"
 # - value: the value of this cookie i.e. "abcdef"
-# - options: a Dictionary of ![cookie attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes) 
-#			 for this specific cookie, in the { "secure" : "true" } format 
+# - options: a Dictionary of ![cookie attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes)
+#			 for this specific cookie, in the { "secure" : "true" } format
 func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 	var cookie: String = name+"="+value
 	if options.has("domain"): cookie+="; Domain="+options["domain"]
@@ -80,8 +80,7 @@ func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 	if options.has("path"): cookie+="; Path="+options["path"]
 	if options.has("secure"): cookie+="; Secure="+options["secure"]
 	if options.has("httpOnly"): cookie+="; HttpOnly="+options["httpOnly"]
-	if options.has("path"): cookie+="; Path="+options["path"]
-	if options.has("sameSite"): 
+	if options.has("sameSite"):
 		match (options["sameSite"]):
 			true: cookie += "; SameSite=Strict"
 			"lax": cookie += "; SameSite=Lax"
@@ -95,7 +94,7 @@ func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 #
 # #### Parameters
 # - code: HTTP Status Code to be matched
-# 
+#
 # Returns: the matched "status_text"
 func _match_status_code(code: int) -> String:
 	var text: String = "OK"
