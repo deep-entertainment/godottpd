@@ -185,6 +185,7 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 				"OPTIONS":
 					found = true
 					router.router.handle_options(request, response)
+			break
 	if not found:	
 		response.send(404, "Not found")
 
