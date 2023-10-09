@@ -5,7 +5,8 @@ extends Node
 func _ready() -> void:
 	var server = HttpServer.new()
 	server.register_router("/", MyExampleRouter.new())
-	add_child(server)
+	add_child(server)	
+	server.enable_cors(["http://localhost:8060"])
 	server.start()
 
 

@@ -18,6 +18,9 @@ var headers: Dictionary = {}
 # Cookies will be automatically sent via "Set-Cookie" headers to clients
 var cookies: Array = []
 
+# Origins allowed to call this resource
+var access_control_origin = "*"
+
 # Send out a raw (Bytes) response to the client
 # Useful to send files faster or raw data which will be converted by the client
 #
@@ -34,6 +37,9 @@ func send_raw(status_code: int, data: PackedByteArray = PackedByteArray([]), con
 		client.put_data(("Set-Cookie: %s\r\n" % cookie).to_ascii_buffer())
 	client.put_data(("Content-Length: %d\r\n" % data.size()).to_ascii_buffer())
 	client.put_data("Connection: close\r\n".to_ascii_buffer())
+	client.put_data(("Access-Control-Allow-Origin: %s\r\n" % access_control_origin).to_ascii_buffer())
+	client.put_data(("Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n").to_ascii_buffer())
+	client.put_data(("Access-Control-Allow-Headers: content-type\r\n").to_ascii_buffer())
 	client.put_data(("Content-Type: %s\r\n\r\n" % content_type).to_ascii_buffer())
 	client.put_data(data)
 
