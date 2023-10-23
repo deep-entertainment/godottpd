@@ -45,9 +45,10 @@ func _init(_logging: bool = false):
 # #### Parameters
 # - message: The message to be printed (only in debug mode)
 func _print_debug(message: String) -> void:
-	var time = Time.get_datetime_dict_from_system()
-	var time_return = "%02d-%02d-%02d %02d:%02d:%02d" % [time.year, time.month, time.day, time.hour, time.minute, time.second]
-	print_debug("[SERVER] ",time_return," >> ", message)
+	if _logger:
+		var time = Time.get_datetime_dict_from_system()
+		var time_return = "%02d-%02d-%02d %02d:%02d:%02d" % [time.year, time.month, time.day, time.hour, time.minute, time.second]
+		print_debug("[SERVER] ",time_return," >> ", message)
 
 # Register a new router to handle a specific path
 #
