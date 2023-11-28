@@ -33,6 +33,9 @@ var _header_regex: RegEx = RegEx.new()
 # The base path used in a project to serve files
 var _local_base_path: String = "res://src"
 
+# list of host allowed to call the server
+var _allowed_origins: PackedStringArray = []
+
 # Compile the required regex
 func _init(_logging: bool = false):
 	self._logging = _logging
@@ -151,9 +154,27 @@ func _handle_request(client: StreamPeer, request_string: String):
 func _perform_current_request(client: StreamPeer, request: HttpRequest):
 	_print_debug("HTTP Request: " + str(request))
 	var found = false
+	var is_allowed_origin = false
 	var response = HttpResponse.new()
+	var fetch_mode = ""
+	var origin = ""
 	response.client = client
 	response.server_identifier = server_identifier
+
+	if request.headers.has("Sec-Fetch-Mode"):
+		fetch_mode = request.headers["Sec-Fetch-Mode"]
+	elif request.headers.has("sec-fetch-mode"):
+		fetch_mode = request.headers["sec-fetch-mode"]
+
+	if request.headers.has("Origin"):
+		origin = request.headers["Origin"]
+	elif request.headers.has("origin"):
+		origin = request.headers["origin"]
+
+	if _allowed_origins.has(origin):
+		is_allowed_origin = true
+		response.access_control_origin = origin
+
 	for router in self._routers:
 		var matches = router.path.search(request.path)
 		if matches:
@@ -183,6 +204,14 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 					found = true
 					router.router.handle_delete(request, response)
 				"OPTIONS":
+					if _allowed_origins.size() > 0 && fetch_mode == "cors":
+						if is_allowed_origin:
+							response.send(204)
+						else:
+							response.send(400, "%s is not present in the allowed origins" % origin)
+
+						return
+
 					found = true
 					router.router.handle_options(request, response)
 			break
@@ -217,6 +246,9 @@ func _path_to_regexp(path: String, should_match_subfolders: bool = false) -> Arr
 	regexp += "[/#?]?$" if not should_match_subfolders else "(?<subpath>$|/.*)" 
 	return [regexp, params]
 
+
+func enable_cors(allowed_origins: PackedStringArray):
+	_allowed_origins = allowed_origins
 
 # Extracts query parameters from a String query, 
 # building a Query Dictionary of param:value pairs
