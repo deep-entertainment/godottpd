@@ -161,16 +161,19 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 	response.client = client
 	response.server_identifier = server_identifier
 
-	
 	if request.headers.has("Sec-Fetch-Mode"):
 		fetch_mode = request.headers["Sec-Fetch-Mode"]
+	elif request.headers.has("sec-fetch-mode"):
+		fetch_mode = request.headers["sec-fetch-mode"]
 
 	if request.headers.has("Origin"):
 		origin = request.headers["Origin"]
+	elif request.headers.has("origin"):
+		origin = request.headers["origin"]
 
-		if _allowed_origins.has(origin):
-			is_allowed_origin = true
-			response.access_control_origin = origin
+	if _allowed_origins.has(origin):
+		is_allowed_origin = true
+		response.access_control_origin = origin
 
 	for router in self._routers:
 		var matches = router.path.search(request.path)
