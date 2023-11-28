@@ -36,6 +36,12 @@ var _local_base_path: String = "res://src"
 # list of host allowed to call the server
 var _allowed_origins: PackedStringArray = []
 
+# Comma separed methods for the access control
+var _access_control_allowed_methods = "POST, GET, OPTIONS"
+
+# Comma separed headers for the access control
+var _access_control_allowed_headers = "content-type"
+
 # Compile the required regex
 func _init(_logging: bool = false):
 	self._logging = _logging
@@ -175,6 +181,9 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 		is_allowed_origin = true
 		response.access_control_origin = origin
 
+	response.access_control_allowed_methods = _access_control_allowed_methods
+	response.access_control_allowed_headers = _access_control_allowed_headers
+
 	for router in self._routers:
 		var matches = router.path.search(request.path)
 		if matches:
@@ -247,8 +256,11 @@ func _path_to_regexp(path: String, should_match_subfolders: bool = false) -> Arr
 	return [regexp, params]
 
 
-func enable_cors(allowed_origins: PackedStringArray):
+func enable_cors(allowed_origins: PackedStringArray, access_control_allowed_methods : String = "POST, GET, OPTIONS", access_control_allowed_headers : String = "content-type"):
 	_allowed_origins = allowed_origins
+	_access_control_allowed_methods = access_control_allowed_methods
+	_access_control_allowed_headers = access_control_allowed_headers
+
 
 # Extracts query parameters from a String query, 
 # building a Query Dictionary of param:value pairs
