@@ -90,7 +90,7 @@ func _process(_delta: float) -> void:
 			if client.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 				var bytes = client.get_available_bytes()
 				if bytes > 0:
-					var request_string = client.get_string(bytes)
+					var request_string = client.get_utf8_string(bytes)
 					self._handle_request(client, request_string)
 
 
