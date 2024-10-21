@@ -92,6 +92,11 @@ func _process(_delta: float) -> void:
 				if bytes > 0:
 					var request_string = client.get_utf8_string(bytes)
 					self._handle_request(client, request_string)
+		_remove_disconnected_clients()
+
+
+func _remove_disconnected_clients():
+	self._clients = self._clients.filter(func(c: StreamPeerTCP): c.get_status() == StreamPeerTCP.STATUS_CONNECTED)
 
 
 # Start the server
