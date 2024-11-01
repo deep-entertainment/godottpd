@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 run/main_scene="res://example/scripts/http_server.tscn"
-config/features=PackedStringArray("4.0")
+config/features=PackedStringArray("4.3")
 
 [editor_plugins]
 

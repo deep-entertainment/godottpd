@@ -1,31 +1,32 @@
-# Class inheriting HttpRouter for handling file serving requests
-extends HttpRouter
+## Class inheriting HttpRouter for handling file serving requests
+##
+## NOTE: This class mainlly handles behind the scenes stuff.
 class_name HttpFileRouter
+extends HttpRouter
 
-# Full path to the folder which will be exposed to web
+## Full path to the folder which will be exposed to web
 var path: String = ""
 
-# Relative path to the index page, which will be served when a request is made to "/" (server root)
+## Relative path to the index page, which will be served when a request is made to "/" (server root)
 var index_page: String = "index.html"
 
-# Relative path to the fallback page which will be served if the requested file was not found
+## Relative path to the fallback page which will be served if the requested file was not found
 var fallback_page: String = ""
 
-# An ordered list of extensions that will be checked
-# if no file extension is provided by the request
+## An ordered list of extensions that will be checked
+## if no file extension is provided by the request
 var extensions: PackedStringArray = ["html"]
 
-# A list of extensions that will be excluded if requested
+## A list of extensions that will be excluded if requested
 var exclude_extensions: PackedStringArray = []
 
-# Creates an HttpFileRouter intance
-#
-# #### Parameters
-# - path: Full path to the folder which will be exposed to web
-# - options: Optional Dictionary of options which can be configured.
-# 	- fallback_page: Full path to the fallback page which will be served if the requested file was not found
-#	- extensions: A list of extensions that will be checked if no file extension is provided by the request
-# 	- exclude_extensions: A list of extensions that will be excluded if requested
+## Creates an HttpFileRouter intance
+## [br]
+## [br][param path] - Full path to the folder which will be exposed to web.
+## [br][param options] - Optional Dictionary of options which can be configured:
+## [br] - [param fallback_page]: Full path to the fallback page which will be served if the requested file was not found
+## [br] - [param extensions]: A list of extensions that will be checked if no file extension is provided by the request
+## [br]	- [param exclude_extensions]: A list of extensions that will be excluded if requested
 func _init(
 	path: String,
 	options: Dictionary = {
@@ -41,7 +42,9 @@ func _init(
 	self.extensions = options.get("extensions", [])
 	self.exclude_extensions = options.get("exclude_extensions", [])
 
-# Handle a GET request
+## Handle a GET request
+## [br]
+## [br][param request] - The request
 func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 	var serving_path: String = path + request.path
 	var file_exists: bool = _file_exists(serving_path)

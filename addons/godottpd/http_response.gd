@@ -1,39 +1,37 @@
-# A response object useful to send out responses
-extends RefCounted
+## A response object useful to send out responses
 class_name HttpResponse
+extends RefCounted
 
 
-# The client currently talking to the server
+## The client currently talking to the server
 var client: StreamPeer
 
-# The server identifier to use on responses [GodotTPD]
+## The server identifier to use on responses [GodotTPD]
 var server_identifier: String = "GodotTPD"
 
-# A dictionary of headers
-# Headers can be set using the `set(name, value)` function
+## A dictionary of headers
+## [br] Headers can be set using the `set(name, value)` function
 var headers: Dictionary = {}
 
-# An array of cookies
-# Cookies can be set using the `cookie(name, value, options)` function
-# Cookies will be automatically sent via "Set-Cookie" headers to clients
+## An array of cookies
+## [br] Cookies can be set using the `cookie(name, value, options)` function
+## [br] Cookies will be automatically sent via "Set-Cookie" headers to clients
 var cookies: Array = []
 
-# Origins allowed to call this resource
+## Origins allowed to call this resource
 var access_control_origin = "*"
 
-# Comma separed methods for the access control
+## Comma separed methods for the access control
 var access_control_allowed_methods = "POST, GET, OPTIONS"
 
-# Comma separed headers for the access control
+## Comma separed headers for the access control
 var access_control_allowed_headers = "content-type"
 
-# Send out a raw (Bytes) response to the client
-# Useful to send files faster or raw data which will be converted by the client
-#
-# #### Parameters
-# - status: The HTTP status code to send
-# - data: The body data to send []
-# - content_type: The type of the content to send ["text/html"]
+## Send out a raw (Bytes) response to the client
+## [br] Useful to send files faster or raw data which will be converted by the client
+## [br][param status] - The HTTP Status code to send
+## [br][param data] - The body data to send
+## [br][param content_type] - The type of content to send.
 func send_raw(status_code: int, data: PackedByteArray = PackedByteArray([]), content_type: String = "application/octet-stream") -> void:
 	client.put_data(("HTTP/1.1 %d %s\r\n" % [status_code, _match_status_code(status_code)]).to_ascii_buffer())
 	client.put_data(("Server: %s\r\n" % server_identifier).to_ascii_buffer())
@@ -49,41 +47,37 @@ func send_raw(status_code: int, data: PackedByteArray = PackedByteArray([]), con
 	client.put_data(("Content-Type: %s\r\n\r\n" % content_type).to_ascii_buffer())
 	client.put_data(data)
 
-# Send out a response to the client
-#
-# #### Parameters
-# - status: The HTTP status code to send
-# - data: The body data to send []
-# - content_type: The type of the content to send ["text/html"]
+## Send out a response to the client
+## [br]
+## [br][param status_code] - The HTTP status code to send
+## [br][param data] - The body to send
+## [br][param content_type] - The type of the content to send
 func send(status_code: int, data: String = "", content_type = "text/html") -> void:
 	send_raw(status_code, data.to_ascii_buffer(), content_type)
 
-# Send out a JSON response to the client
-# This function will internally call the `send()` method
-#
-# #### Parameters
-# - status_code: The HTTP status code to send
-# - data: The body data to send, must be a Dictionary or an Array
+## Send out a JSON response to the client
+## [br] This function will internally call the [method send]
+## [br]
+## [br][param status_code] - The HTTP status code to send
+## [br][param data] - The body to send
 func json(status_code: int, data) -> void:
 	send(status_code, JSON.stringify(data), "application/json")
 
 
-# Sets the response’s header "field" to "value"
-#
-# #### Parameters
-# - field: the name of the header i.e. "Accept-Type"
-# - value: the value of this header i.e. "application/json"
+## Sets the response’s header "field" to "value"
+## [br]
+## [br][param field] - The name of the header. i.e. [code]Accept-Type[/code]
+## [br][param value] - The value of this header. i.e. [code]application/json[/code]
 func set(field: StringName, value: Variant) -> void:
 	headers[field] = value
 
 
-# Sets cookie "name" to "value"
-#
-# #### Parameters
-# - name: the name of the cookie i.e. "user-id"
-# - value: the value of this cookie i.e. "abcdef"
-# - options: a Dictionary of ![cookie attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes)
-#			 for this specific cookie, in the { "secure" : "true" } format
+## Sets cookie "name" to "value"
+## [br]
+## [br][param name] - The name of the cookie. i.e. [code]user-id[/code]
+## [br][param value] - The value of this cookie. i.e. [code]abcdef[/code]
+## [br][param options] - A Dictionary of [url=https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes]cookie attributes[/url]
+## for this specific cokkie in the [code]{ "secure" : "true"}[/code] format.
 func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 	var cookie: String = name+"="+value
 	if options.has("domain"): cookie+="; Domain="+options["domain"]
@@ -102,12 +96,10 @@ func cookie(name: String, value: String, options: Dictionary = {}) -> void:
 	cookies.append(cookie)
 
 
-# Automatically matches a "status_code" to an RFC 7231 compliant "status_text"
-#
-# #### Parameters
-# - code: HTTP Status Code to be matched
-#
-# Returns: the matched "status_text"
+## Automatically matches a "status_code" to an RFC 7231 compliant "status_text"
+## [br]
+## [br][param code] - The HTTP Status code to be matched
+## [br]Returns: the matched [code]status_text[/code]
 func _match_status_code(code: int) -> String:
 	var text: String = "OK"
 	match(code):

@@ -1,19 +1,28 @@
-# A routable HTTP server for Godot
-extends Node
+## A routable HTTP server for Godot
+##
+## Controlls a back-end localhost server.
+## [br]Example usage:
+## [codeblock]
+## var server := HttpServer.new()
+## server.register_router("/", MyExampleRouter.new())
+## add_child(server)
+## server.start()
+## [/codeblock]
+
 class_name HttpServer
+extends Node
+
+## The ip address to bind the server to. Use * for all IP addresses [*]
+var bind_address: String = "*"
+
+## The port to bind the server to. [8080]
+var port: int = 8080
+
+## The server identifier to use when responding to requests [GodotTPD]
+var server_identifier: String = "GodotTPD"
 
 # If `HttpRequest`s and `HttpResponse`s should be logged
 var _logging: bool = false
-
-# The ip address to bind the server to. Use * for all IP addresses [*]
-var bind_address: String = "*"
-
-# The port to bind the server to. [8080]
-var port: int = 8080
-
-# The server identifier to use when responding to requests [GodotTPD]
-var server_identifier: String = "GodotTPD"
-
 
 # The TCP server instance used
 var _server: TCPServer
@@ -50,7 +59,7 @@ func _init(_logging: bool = false):
 	_header_regex.compile("^(?<key>[\\w-]+): (?<value>(.*))$")
 
 # Print a debug message in console, if the debug mode is enabled
-# 
+#
 # #### Parameters
 # - message: The message to be printed (only in debug mode)
 func _print_debug(message: String) -> void:
@@ -58,12 +67,11 @@ func _print_debug(message: String) -> void:
 	var time_return = "%02d-%02d-%02d %02d:%02d:%02d" % [time.year, time.month, time.day, time.hour, time.minute, time.second]
 	print_debug("[SERVER] ",time_return," >> ", message)
 
-# Register a new router to handle a specific path
-#
-# #### Parameters
-# - path: The path the router will handle. Supports a regular expression and the
-#   group matches will be available in HttpRequest.query_match.
-# - router: The HttpRouter that will handle the request
+## Register a new router to handle a specific path
+## [br]
+## [br][param path] - The path the router will handle.
+## Supports a regular expression and the group matches will be available in HttpRequest.query_match.
+## [br][param router] - The router which will handle the request
 func register_router(path: String, router: HttpRouter):
 	var path_regex = RegEx.new()
 	var params: Array = []
@@ -99,7 +107,7 @@ func _remove_disconnected_clients():
 	self._clients = self._clients.filter(func(c: StreamPeerTCP): c.get_status() == StreamPeerTCP.STATUS_CONNECTED)
 
 
-# Start the server
+## Start the server
 func start():
 	set_process(true)
 	self._server = TCPServer.new()
@@ -112,7 +120,7 @@ func start():
 			_print_debug("HTTP Server listening on http://%s:%s" % [self.bind_address, self.port])
 
 
-# Stop the server and disconnect all clients
+## Stop the server and disconnect all clients
 func stop():
 	for client in self._clients:
 		client.disconnect_from_host()
@@ -120,7 +128,7 @@ func stop():
 	self._server.stop()
 	set_process(false)
 	_print_debug("Server stopped.")
-	
+
 
 # Interpret a request string and perform the request
 #
@@ -229,7 +237,7 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 					found = true
 					router.router.handle_options(request, response)
 			break
-	if not found:	
+	if not found:
 		response.send(404, "Not found")
 
 
@@ -238,9 +246,9 @@ func _perform_current_request(client: StreamPeer, request: HttpRequest):
 #
 # #### Parameters
 # - path: The path of the HttpRequest
-# - should_match_subfolder: (dafult [false]) if subfolders should be matched and grouped, 
+# - should_match_subfolder: (dafult [false]) if subfolders should be matched and grouped,
 #							used for HttpFileRouter
-# 
+#
 # Returns: A 2D array, containing a @regexp String and Dictionary of @params
 # 			[0] = @regexp --> the output expression as a String, to be compiled in RegExp
 # 			[1] = @params --> an Array of parameters, indexed by names
@@ -257,17 +265,22 @@ func _path_to_regexp(path: String, should_match_subfolders: bool = false) -> Arr
 			params.append(fragment)
 		else:
 			regexp += "/" + fragment
-	regexp += "[/#?]?$" if not should_match_subfolders else "(?<subpath>$|/.*)" 
+	regexp += "[/#?]?$" if not should_match_subfolders else "(?<subpath>$|/.*)"
 	return [regexp, params]
 
 
+## Enable CORS (Cross-origin resource sharing) which only allows requests from the specified servers
+## [br]
+## [br][param allowed_origins] - The origins that area allowed to be access from this sesrver
+## [br][param access_control_allowed_methods] - The methods that are allowed to be sent
+## [br][param access_control_allowed_headers] - The headers that are allowed to be sent
 func enable_cors(allowed_origins: PackedStringArray, access_control_allowed_methods : String = "POST, GET, OPTIONS", access_control_allowed_headers : String = "content-type"):
 	_allowed_origins = allowed_origins
 	_access_control_allowed_methods = access_control_allowed_methods
 	_access_control_allowed_headers = access_control_allowed_headers
 
 
-# Extracts query parameters from a String query, 
+# Extracts query parameters from a String query,
 # building a Query Dictionary of param:value pairs
 #
 # #### Parameters
