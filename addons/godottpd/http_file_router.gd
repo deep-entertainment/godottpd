@@ -1,6 +1,6 @@
 ## Class inheriting HttpRouter for handling file serving requests
 ##
-## NOTE: This class mainlly handles behind the scenes stuff.
+## NOTE: This class mainly handles behind the scenes stuff.
 class_name HttpFileRouter
 extends HttpRouter
 
@@ -44,7 +44,8 @@ func _init(
 
 ## Handle a GET request
 ## [br]
-## [br][param request] - The request
+## [br][param request] - The request from the client
+## [br][param response] - The response to send to the clinet
 func handle_get(request: HttpRequest, response: HttpResponse) -> void:
 	var serving_path: String = path + request.path
 	var file_exists: bool = _file_exists(serving_path)
