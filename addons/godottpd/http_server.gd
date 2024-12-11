@@ -1,6 +1,6 @@
 ## A routable HTTP server for Godot
 ##
-## Controlls a back-end localhost server.
+## Provides a web server with routes for specific endpoints
 ## [br]Example usage:
 ## [codeblock]
 ## var server := HttpServer.new()
@@ -271,8 +271,8 @@ func _path_to_regexp(path: String, should_match_subfolders: bool = false) -> Arr
 
 ## Enable CORS (Cross-origin resource sharing) which only allows requests from the specified servers
 ## [br]
-## [br][param allowed_origins] - The origins that area allowed to be access from this sesrver
-## [br][param access_control_allowed_methods] - The methods that are allowed to be sent
+## [br][param allowed_origins] - The origins that are allowed to be accessed from this server
+## [br][param access_control_allowed_methods] - The methods that are allowed to be used
 ## [br][param access_control_allowed_headers] - The headers that are allowed to be sent
 func enable_cors(allowed_origins: PackedStringArray, access_control_allowed_methods : String = "POST, GET, OPTIONS", access_control_allowed_headers : String = "content-type"):
 	_allowed_origins = allowed_origins
