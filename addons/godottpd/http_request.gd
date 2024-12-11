@@ -48,6 +48,6 @@ func get_body_parsed() -> Variant:
 	# Not supported contenty type parsing... for now
 	return null
 
-# #Override `str()` method, automatically called in `print()` function
+## Override `str()` method, automatically called in `print()` function
 func _to_string() -> String:
 	return JSON.stringify({headers=headers, method=method, path=path})
