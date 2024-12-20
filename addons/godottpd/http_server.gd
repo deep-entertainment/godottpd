@@ -88,13 +88,15 @@ func register_router(path: String, router: HttpRouter):
 	})
 
 
-# Handle possibly incoming requests
+## Handle possibly incoming requests
 func _process(_delta: float) -> void:
 	if _server:
-		var new_client = _server.take_connection()
-		if new_client:
-			self._clients.append(new_client)
+		while _server.is_connection_available():
+			var new_client = _server.take_connection()
+			if new_client:
+				self._clients.append(new_client)
 		for client in self._clients:
+			client.poll()
 			if client.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 				var bytes = client.get_available_bytes()
 				if bytes > 0:
@@ -104,7 +106,10 @@ func _process(_delta: float) -> void:
 
 
 func _remove_disconnected_clients():
-	self._clients = self._clients.filter(func(c: StreamPeerTCP): c.get_status() == StreamPeerTCP.STATUS_CONNECTED)
+	var valid_statuses = [StreamPeerTCP.STATUS_CONNECTED, StreamPeerTCP.STATUS_CONNECTING]
+	self._clients = self._clients.filter(
+		func(c: StreamPeerTCP): return valid_statuses.has(c.get_status())
+	)
 
 
 ## Start the server
