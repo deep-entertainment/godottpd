@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This needs a new maintainer, as I'm not using it anymore currently and can't continue to support it. Please se https://github.com/deep-entertainment/issues/issues/56 for details
+
 # GodotTPD
 
 A routeable HTTP server for Godot.
