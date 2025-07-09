@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This needs a new maintainer, as I'm not using it anymore currently and can't continue to support it. Please se https://github.com/deep-entertainment/issues/issues/56 for details
+> This repository is deprecated. Please see the fork https://github.com/bit-garden/godottpd for the current version.
 
 # GodotTPD
 
